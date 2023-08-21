@@ -1,0 +1,24 @@
+#!groovy
+import groovy.json.JsonSlurperClassic
+import groovy.json.JsonOutput
+
+node('node1') {
+    stage('dailytask') {
+        echo 'dailytask'
+    }
+
+    sh'''
+        cd $HOME/sphinx-test
+        make clean
+        make html
+        nowDay=`date +%Y%m%d`
+
+        curl -H 'Content-Type: application/json' -d '
+        {
+            "msgtype": "text",
+            "text": {
+                "content": "'$nowDay'任务\nhttp://10.20.xx.xxx:9080/"
+            }
+        }' "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxx"
+    '''
+}
